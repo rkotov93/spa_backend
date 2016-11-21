@@ -2,7 +2,7 @@ module Api
   module V1
     class PostsController < ApplicationController
       def index
-        posts = Post.includes(:user)
+        posts = Post.includes(:user).page(params[:page] || 1)
         render json: posts
       end
 
