@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class PostSerializer < ActiveModel::Serializer
   attributes :id, :title, :body, :author
   attribute :errors, if: :errors_presented?
