@@ -1,24 +1,16 @@
 # README
+[![Build Status](https://travis-ci.org/rkotov93/spa_backend.svg?branch=master)](https://travis-ci.org/rkotov93/spa_backend)
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+This is an learning project for MKDEV mentoring resource.
 
-Things you may want to cover:
+Requisites
+--
+You need to have PostgreSQL 9.4 installed
 
-* Ruby version
-
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+Bootstraping
+--
+To start this application do following steps:
+* `bundle`
+* Add `config/application.yml` with `db_user: <Your database user>` and `db_password: <Your database user password>`
+* `rake db:create` `rake db:migrate`
+* `rails s`
