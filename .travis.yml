@@ -10,5 +10,5 @@ addons:
 before_script:
   - psql -c 'create database spa_backend_test;' -U postgres
 script:
-  - rubocop -R
+  - bundle exec rubocop -R
   - bundle exec rspec spec
