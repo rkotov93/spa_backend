@@ -1,4 +1,14 @@
 language: ruby
 rvm:
   - 2.3.1
-script: bundle exec rspec spec
+env:
+  - db_user=postgres db_password=
+services:
+  - postgresql
+addons:
+  postgresql: "9.4"
+before_script:
+  - psql -c 'create database spa_backend_test;' -U postgres
+script:
+  - rubocop -R
+  - bundle exec rspec spec
