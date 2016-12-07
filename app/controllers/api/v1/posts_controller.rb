@@ -3,7 +3,7 @@ module Api
   module V1
     class PostsController < ApplicationController
       def index
-        posts = Post.includes(:user).page(params[:page] || 1)
+        posts = Post.includes(:user).order(created_at: :desc).page(params[:page] || 1)
         render json: posts
       end
 
@@ -13,20 +13,21 @@ module Api
       end
 
       def create
-        post = current_user.posts.create(post_params)
-        render json: post
+        post = current_user.posts.build(post_params)
+        status = post.save ? :ok : :internal_server_error
+        render json: post, status: status
       end
 
       def update
         post = Post.find(params[:id])
-        post.update_attributes(post_params)
-        render json: post
+        status = post.update_attributes(post_params) ? :ok : :internal_server_error
+        render json: post, status: status
       end
 
       def destroy
         post = Post.find(params[:id])
-        post.destroy
-        render json: post
+        status = post.destroy ? :ok : :internal_server_error
+        render json: post, status: status
       end
 
       private
