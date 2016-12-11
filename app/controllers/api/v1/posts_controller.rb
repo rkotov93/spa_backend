@@ -14,19 +14,19 @@ module Api
 
       def create
         post = current_user.posts.build(post_params)
-        status = post.save ? :ok : :internal_server_error
+        status = post.save ? :ok : :not_acceptable
         render json: post, status: status
       end
 
       def update
         post = Post.find(params[:id])
-        status = post.update_attributes(post_params) ? :ok : :internal_server_error
+        status = post.update_attributes(post_params) ? :ok : :not_acceptable
         render json: post, status: status
       end
 
       def destroy
         post = Post.find(params[:id])
-        status = post.destroy ? :ok : :internal_server_error
+        status = post.destroy ? :ok : :not_acceptable
         render json: post, status: status
       end
 
