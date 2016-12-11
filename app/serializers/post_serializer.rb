@@ -4,7 +4,7 @@ class PostSerializer < ActiveModel::Serializer
   attribute :errors, if: :errors_presented?
 
   def author
-    object.user.name
+    object.user.try(:name)
   end
 
   def errors_presented?
