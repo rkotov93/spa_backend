@@ -47,7 +47,7 @@ RSpec.describe 'Posts', type: :request do
 
       it 'returns post with validation errors' do
         expect(Post.count).to eq posts_count
-        expect(response).to have_http_status(500)
+        expect(response).to have_http_status(406)
         invalid_post = Post.new(post_params.merge(user: user))
         invalid_post.valid?
         expect(response.body).to eq PostSerializer.new(invalid_post).to_json
@@ -69,7 +69,7 @@ RSpec.describe 'Posts', type: :request do
       before { patch api_v1_post_path(first_post), params: { post: { title: 'a' * 121 } } }
 
       it 'does not updates post title' do
-        expect(response).to have_http_status(500)
+        expect(response).to have_http_status(406)
         expect(first_post.reload.title).to eq first_post.title
       end
     end
