@@ -21,3 +21,6 @@
 
 # Ignore gemset configuration
 /.ruby-gemset
+
+# Ignore provision keys
+/config/provision/keys

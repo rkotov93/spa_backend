@@ -1,0 +1,80 @@
+---
+- hosts: all
+  remote_user: ubuntu
+  become: yes
+
+  vars:
+    user: ubuntu
+    home: /home/{{ user }}
+    name: spa_backend
+    db_user: spa_backend_db_user
+    db_password: spa_backend_db_password
+    application: "{{ home }}/applications/{{ name }}"
+
+  roles:
+    # Install rvm with rvm1-ansible role
+    - {
+        role: rvm_io.ruby,
+        tags: ruby,
+        rvm1_install_path: ~/.rvm,
+        rvm1_rubies: [ruby-2.3.1],
+        rvm1_user: "{{ user }}",
+        rvm1_bundler_install: True
+      }
+
+  tasks:
+    - name: packages | apt update
+      apt: update_cache=yes
+
+    - name: packages | install dependencies
+      apt: name={{ item }}
+      with_items:
+        - python-psycopg2
+        - build-essential
+        - libssl-dev
+        - libyaml-dev
+        - libreadline6-dev
+        - zlib1g-dev
+        - libcurl4-openssl-dev
+        - git
+        - nginx
+        - redis-server
+        - postgresql
+        - postgresql-contrib
+        - libpq-dev
+
+    # - name: 'account | copy authorized keys'
+    #   shell: 'mkdir -p {{ home }}/.ssh -m 700 && cp /{{ user }}/.ssh/authorized_keys {{ home }}/.ssh && chown -R {{ user }}:{{ user }} {{ home }}/.ssh'
+    #
+    # - name: 'account | copy ssh private key'
+    #   copy: 'src=keys/id_rsa dest={{ home }}/.ssh/id_rsa owner={{ user }} group={{ user }} mode=0600'
+    #
+    # - name: 'account | copy ssh public key'
+    #   copy: 'src=keys/id_rsa.pub dest={{ home }}/.ssh/id_rsa.pub owner={{ user }} group={{ user }} mode=0644'
+
+    - name: postgres | create database user
+      become: yes
+      become_user: postgres
+      vars:
+        ansible_ssh_pipelining: true
+      postgresql_user:
+        name: "{{ db_user }}"
+        password: "{{ db_password }}"
+        role_attr_flags: CREATEDB
+
+    - name: nginx | check config
+      command: test -f /etc/nginx/sites-enabled/{{ name }}.conf
+      register: nginx_config_copied
+      ignore_errors: yes
+
+    - name: nginx | createdir
+      shell: rm /etc/nginx/sites-enabled/default; mkdir -p etc/nginx/sites-enabled/
+      when: nginx_config_copied|failed
+
+    - name: nginx | copy config
+      template: src=configs/nginx.conf dest=/etc/nginx/sites-enabled/{{ name }}.conf owner=ubuntu group=root mode=0644
+      when: nginx_config_copied|failed
+
+    - name: nginx | restart service
+      service: name=nginx state=restarted
+      when: nginx_config_copied|failed
