@@ -43,14 +43,11 @@
         - postgresql-contrib
         - libpq-dev
 
-    # - name: 'account | copy authorized keys'
-    #   shell: 'mkdir -p {{ home }}/.ssh -m 700 && cp /{{ user }}/.ssh/authorized_keys {{ home }}/.ssh && chown -R {{ user }}:{{ user }} {{ home }}/.ssh'
-    #
-    # - name: 'account | copy ssh private key'
-    #   copy: 'src=keys/id_rsa dest={{ home }}/.ssh/id_rsa owner={{ user }} group={{ user }} mode=0600'
-    #
-    # - name: 'account | copy ssh public key'
-    #   copy: 'src=keys/id_rsa.pub dest={{ home }}/.ssh/id_rsa.pub owner={{ user }} group={{ user }} mode=0644'
+    - name: 'account | copy ssh private key'
+      copy: 'src=keys/id_rsa dest={{ home }}/.ssh/id_rsa owner={{ user }} group={{ user }} mode=0600'
+
+    - name: 'account | copy ssh public key'
+      copy: 'src=keys/id_rsa.pub dest={{ home }}/.ssh/id_rsa.pub owner={{ user }} group={{ user }} mode=0644'
 
     - name: postgres | create database user
       become: yes
@@ -72,7 +69,7 @@
       when: nginx_config_copied|failed
 
     - name: nginx | copy config
-      template: src=configs/nginx.conf dest=/etc/nginx/sites-enabled/{{ name }}.conf owner=ubuntu group=root mode=0644
+      template: src=configs/nginx.conf dest=/etc/nginx/sites-enabled/{{ name }}.conf owner={{ user }} group={{ user }} mode=0644
       when: nginx_config_copied|failed
 
     - name: nginx | restart service
