@@ -7,8 +7,6 @@
     user: ubuntu
     home: /home/{{ user }}
     name: spa_backend
-    db_user: spa_backend_db_user
-    db_password: spa_backend_db_password
     application: "{{ home }}/applications/{{ name }}"
 
   roles:
@@ -29,7 +27,6 @@
     - name: packages | install dependencies
       apt: name={{ item }}
       with_items:
-        - python-psycopg2
         - build-essential
         - libssl-dev
         - libyaml-dev
@@ -49,17 +46,48 @@
     - name: 'account | copy ssh public key'
       copy: 'src=keys/id_rsa.pub dest={{ home }}/.ssh/id_rsa.pub owner={{ user }} group={{ user }} mode=0644'
 
-    - name: postgres | create database user
-      become: yes
-      become_user: postgres
-      vars:
-        ansible_ssh_pipelining: true
-      postgresql_user:
-        name: "{{ db_user }}"
-        password: "{{ db_password }}"
-        role_attr_flags: CREATEDB
+    - name: 'postgres | check user'
+      shell: 'psql -U postgres -c "\copyright"'
+      register: 'postgres_login'
+      ignore_errors: yes
+    # vars:
+    #   ansible_ssh_pipelining: true
 
-    - name: nginx | check config
+    - name: 'postgres | set auth type'
+      copy: 'src=configs/pg_hba.conf dest=/etc/postgresql/9.3/main/pg_hba.conf owner=postgres group=postgres mode=0644'
+      when: 'postgres_login|failed'
+
+    - name: 'postgresql | restart service'
+      service: name=postgresql state=restarted
+      when: 'postgres_login|failed'
+
+    - name: postgres | check configs
+      command: test -f {{ application }}/shared/config/database.yml
+      register: postgres_config_copied
+      ignore_errors: yes
+
+    - name: 'postgres | create shared directory'
+      shell: 'mkdir -p {{ application }}/shared/config -m 775 && chown -R {{ user }}:{{ user }} {{ home }}/applications'
+      when: 'postgres_config_copied|failed'
+
+    - name: postgres | copy database.yml
+      template: 'src=configs/database.yml dest={{ application }}/shared/config/database.yml owner={{ user }} group={{ user }} mode=0644'
+      when: postgres_config_copied|failed
+
+    - name: 'postgresql | create database'
+      shell: 'createdb -U postgres -O postgres -E UTF8 -l en_US.UTF-8 {{ name }}_production'
+      when: 'postgres_config_copied|failed'
+
+    - name: application | check configs
+      command: test -f {{ application }}/shared/config/application.yml
+      register: application_config_copied
+      ignore_errors: yes
+
+    - name: application | copy application.yml
+      template: 'src=configs/application.yml dest={{ application }}/shared/config/application.yml owner={{ user }} group={{ user }} mode=0644'
+      when: application_config_copied|failed
+
+    - name: nginx | check configs
       command: test -f /etc/nginx/sites-enabled/{{ name }}.conf
       register: nginx_config_copied
       ignore_errors: yes

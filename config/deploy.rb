@@ -3,6 +3,7 @@
 lock '3.7.0'
 
 set :application, 'spa_backend'
+set :user, 'ubuntu'
 set :repo_url, 'git@github.com:rkotov93/spa_backend.git'
 
 # Default branch is :master
@@ -22,7 +23,7 @@ set :deploy_to, '/home/ubuntu/applications/spa_backend'
 set :pty, true
 
 # Default value for :linked_files is []
-# append :linked_files, 'config/database.yml', 'config/application.yml'
+append :linked_files, 'config/database.yml', 'config/application.yml'
 
 # Default value for linked_dirs is []
 append :linked_dirs, 'log', 'tmp/pids', 'tmp/cache', 'tmp/sockets', 'public/system'

@@ -4,7 +4,7 @@
 # Defines a single server with a list of roles and multiple properties.
 # You can define all roles on a single server, or split them:
 
-server '35.156.224.134', user: 'ubuntu', roles: %w(app db web), primary: true
+server '35.156.233.82', user: 'ubuntu', roles: %w(app db web), primary: true
 # server "example.com", user: "deploy", roles: %w{app web}, other_property: :other_value
 # server "db.example.com", user: "deploy", roles: %w{db}
 
