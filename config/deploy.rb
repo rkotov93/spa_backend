@@ -22,7 +22,7 @@ set :deploy_to, '/home/ubuntu/applications/spa_backend'
 set :pty, true
 
 # Default value for :linked_files is []
-append :linked_files, 'config/database.yml', 'config/application.yml'
+# append :linked_files, 'config/database.yml', 'config/application.yml'
 
 # Default value for linked_dirs is []
 append :linked_dirs, 'log', 'tmp/pids', 'tmp/cache', 'tmp/sockets', 'public/system'
@@ -33,11 +33,6 @@ append :linked_dirs, 'log', 'tmp/pids', 'tmp/cache', 'tmp/sockets', 'public/syst
 # Default value for keep_releases is 5
 # set :keep_releases, 5
 
-set :puma_bind,       "unix:/home/ubuntu/applications/spa_backend/shared/tmp/sockets/puma.sock"
-set :puma_state,      "/home/ubuntu/applications/spa_backend/shared/tmp/pids/puma.state"
-set :puma_pid,        "/home/ubuntu/applications/spa_backend/shared/tmp/pids/puma.pid"
-set :puma_access_log, "/home/ubuntu/applications/spa_backend/releases/log/puma.error.log"
-set :puma_error_log,  "/home/ubuntu/applications/spa_backend/releases/log/puma.access.log"
 set :puma_init_active_record, true
 
 # Configure rvm
