@@ -1,0 +1,105 @@
+---
+- hosts: all
+  remote_user: ubuntu
+  become: yes
+
+  vars:
+    user: ubuntu
+    home: /home/{{ user }}
+    name: spa_backend
+    application: "{{ home }}/applications/{{ name }}"
+
+  roles:
+    # Install rvm with rvm1-ansible role
+    - {
+        role: rvm_io.ruby,
+        tags: ruby,
+        rvm1_install_path: ~/.rvm,
+        rvm1_rubies: [ruby-2.3.1],
+        rvm1_user: "{{ user }}",
+        rvm1_bundler_install: True
+      }
+
+  tasks:
+    - name: packages | apt update
+      apt: update_cache=yes
+
+    - name: packages | install dependencies
+      apt: name={{ item }}
+      with_items:
+        - build-essential
+        - libssl-dev
+        - libyaml-dev
+        - libreadline6-dev
+        - zlib1g-dev
+        - libcurl4-openssl-dev
+        - git
+        - nginx
+        - redis-server
+        - postgresql
+        - postgresql-contrib
+        - libpq-dev
+
+    - name: 'account | copy ssh private key'
+      copy: 'src=keys/id_rsa dest={{ home }}/.ssh/id_rsa owner={{ user }} group={{ user }} mode=0600'
+
+    - name: 'account | copy ssh public key'
+      copy: 'src=keys/id_rsa.pub dest={{ home }}/.ssh/id_rsa.pub owner={{ user }} group={{ user }} mode=0644'
+
+    - name: 'postgres | check user'
+      shell: 'psql -U postgres -c "\copyright"'
+      register: 'postgres_login'
+      ignore_errors: yes
+    # vars:
+    #   ansible_ssh_pipelining: true
+
+    - name: 'postgres | set auth type'
+      copy: 'src=configs/pg_hba.conf dest=/etc/postgresql/9.3/main/pg_hba.conf owner=postgres group=postgres mode=0644'
+      when: 'postgres_login|failed'
+
+    - name: 'postgresql | restart service'
+      service: name=postgresql state=restarted
+      when: 'postgres_login|failed'
+
+    - name: postgres | check configs
+      command: test -f {{ application }}/shared/config/database.yml
+      register: postgres_config_copied
+      ignore_errors: yes
+
+    - name: 'postgres | create shared directory'
+      shell: 'mkdir -p {{ application }}/shared/config -m 775 && chown -R {{ user }}:{{ user }} {{ home }}/applications'
+      when: 'postgres_config_copied|failed'
+
+    - name: postgres | copy database.yml
+      template: 'src=configs/database.yml dest={{ application }}/shared/config/database.yml owner={{ user }} group={{ user }} mode=0644'
+      when: postgres_config_copied|failed
+
+    - name: 'postgresql | create database'
+      shell: 'createdb -U postgres -O postgres -E UTF8 -l en_US.UTF-8 {{ name }}_production'
+      when: 'postgres_config_copied|failed'
+
+    - name: application | check configs
+      command: test -f {{ application }}/shared/config/application.yml
+      register: application_config_copied
+      ignore_errors: yes
+
+    - name: application | copy application.yml
+      template: 'src=configs/application.yml dest={{ application }}/shared/config/application.yml owner={{ user }} group={{ user }} mode=0644'
+      when: application_config_copied|failed
+
+    - name: nginx | check configs
+      command: test -f /etc/nginx/sites-enabled/{{ name }}.conf
+      register: nginx_config_copied
+      ignore_errors: yes
+
+    - name: nginx | createdir
+      shell: rm /etc/nginx/sites-enabled/default; mkdir -p etc/nginx/sites-enabled/
+      when: nginx_config_copied|failed
+
+    - name: nginx | copy config
+      template: src=configs/nginx.conf dest=/etc/nginx/sites-enabled/{{ name }}.conf owner={{ user }} group={{ user }} mode=0644
+      when: nginx_config_copied|failed
+
+    - name: nginx | restart service
+      service: name=nginx state=restarted
+      when: nginx_config_copied|failed

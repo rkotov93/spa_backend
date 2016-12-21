@@ -1,0 +1,6 @@
+production:
+  adapter: postgresql
+  encoding: utf8
+  pool: 8
+  database: "{{ name }}_production"
+  username: postgres

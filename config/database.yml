@@ -79,9 +79,3 @@ test:
 #
 #   production:
 #     url: <%= ENV['DATABASE_URL'] %>
-#
-production:
-  <<: *default
-  database: spa_backend_production
-  username: spa_backend
-  password: <%= ENV['SPA_BACKEND_DATABASE_PASSWORD'] %>

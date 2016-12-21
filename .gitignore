@@ -21,3 +21,9 @@
 
 # Ignore gemset configuration
 /.ruby-gemset
+
+# Ignore provision keys
+/config/provision/keys
+
+# Ignore production ENV configs
+/config/provision/configs/application.yml
