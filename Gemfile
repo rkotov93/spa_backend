@@ -26,6 +26,12 @@ gem 'figaro'
 # JSON serializer
 gem 'active_model_serializers', '~> 0.10.0'
 
+# JWT authentication
+gem 'knock'
+
+# Email validator
+gem 'email_validator'
+
 # Pagination
 gem 'will_paginate', '~> 3.1.0'
 

@@ -80,7 +80,7 @@ RSpec.describe 'Posts', type: :request do
 
     before { delete api_v1_post_path(first_post) }
 
-    it 'updates post title' do
+    it 'destroys post' do
       expect(response).to have_http_status(200)
       expect(Post.count).to eq posts_count - 1
     end
