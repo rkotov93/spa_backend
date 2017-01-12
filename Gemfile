@@ -29,6 +29,9 @@ gem 'active_model_serializers', '~> 0.10.0'
 # JWT authentication
 gem 'knock'
 
+# Authorization
+gem 'pundit'
+
 # Email validator
 gem 'email_validator'
 

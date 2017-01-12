@@ -22,12 +22,14 @@ module Api
 
       def update
         post = Post.find(params[:id])
+        authorize post
         status = post.update_attributes(post_params) ? :ok : :not_acceptable
         render json: post, status: status
       end
 
       def destroy
         post = Post.find(params[:id])
+        authorize post
         status = post.destroy ? :ok : :not_acceptable
         render json: post, status: status
       end
