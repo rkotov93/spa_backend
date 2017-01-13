@@ -30,7 +30,7 @@ RSpec.describe 'Posts', type: :request do
     context 'with valid params' do
       before do
         post_params = { title: new_post.title, body: new_post.body }
-        post api_v1_posts_path, params: { post: post_params }
+        post api_v1_posts_path, headers: { authorization: jwt_for(user) }, params: { post: post_params }
       end
 
       it 'creates and returns new post' do
@@ -43,7 +43,7 @@ RSpec.describe 'Posts', type: :request do
     context 'with invalid params' do
       let(:post_params) { { title: 'a' * 121, body: new_post.body } }
 
-      before { post api_v1_posts_path, params: { post: post_params } }
+      before { post api_v1_posts_path, headers: { authorization: jwt_for(user) }, params: { post: post_params } }
 
       it 'returns post with validation errors' do
         expect(Post.count).to eq posts_count
@@ -57,7 +57,10 @@ RSpec.describe 'Posts', type: :request do
 
   describe 'PATCH /posts/:id' do
     context 'with valid params' do
-      before { patch api_v1_post_path(first_post), params: { post: { title: 'New title' } } }
+      before do
+        patch api_v1_post_path(first_post), headers: { authorization: jwt_for(user) },
+                                            params: { post: { title: 'New title' } }
+      end
 
       it 'updates post title' do
         expect(response).to have_http_status(200)
@@ -66,7 +69,10 @@ RSpec.describe 'Posts', type: :request do
     end
 
     context 'with invalid params' do
-      before { patch api_v1_post_path(first_post), params: { post: { title: 'a' * 121 } } }
+      before do
+        patch api_v1_post_path(first_post), headers: { authorization: jwt_for(user) },
+                                            params: { post: { title: 'a' * 121 } }
+      end
 
       it 'does not updates post title' do
         expect(response).to have_http_status(406)
@@ -78,7 +84,7 @@ RSpec.describe 'Posts', type: :request do
   describe 'DELETE /posts/:id' do
     let!(:posts_count) { Post.count }
 
-    before { delete api_v1_post_path(first_post) }
+    before { delete api_v1_post_path(first_post), headers: { authorization: jwt_for(user) } }
 
     it 'destroys post' do
       expect(response).to have_http_status(200)
