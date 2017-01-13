@@ -1,5 +1,5 @@
+# frozen_string_literal: true
 Knock.setup do |config|
-
   ## Expiration claim
   ## ----------------
   ##
@@ -8,7 +8,6 @@ Knock.setup do |config|
   ##
   ## Default:
   # config.token_lifetime = 1.day
-
 
   ## Audience claim
   ## --------------
