@@ -2,6 +2,8 @@
 module Api
   module V1
     class PostsController < ApplicationController
+      before_action :authenticate_user, only: [:create, :update, :destroy]
+
       def index
         posts = Post.includes(:user).order(created_at: :desc).page(params[:page] || 1)
         render json: posts
@@ -20,12 +22,14 @@ module Api
 
       def update
         post = Post.find(params[:id])
+        authorize post
         status = post.update_attributes(post_params) ? :ok : :not_acceptable
         render json: post, status: status
       end
 
       def destroy
         post = Post.find(params[:id])
+        authorize post
         status = post.destroy ? :ok : :not_acceptable
         render json: post, status: status
       end

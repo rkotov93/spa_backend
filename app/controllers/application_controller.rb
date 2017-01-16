@@ -1,8 +1,13 @@
 # frozen_string_literal: true
 class ApplicationController < ActionController::API
-  protected
+  include Knock::Authenticable
+  include Pundit
 
-  def current_user
-    User.first
+  rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
+
+  private
+
+  def user_not_authorized
+    render status: :unauthorized
   end
 end

@@ -26,6 +26,15 @@ gem 'figaro'
 # JSON serializer
 gem 'active_model_serializers', '~> 0.10.0'
 
+# JWT authentication
+gem 'knock'
+
+# Authorization
+gem 'pundit'
+
+# Email validator
+gem 'email_validator'
+
 # Pagination
 gem 'will_paginate', '~> 3.1.0'
 
@@ -37,6 +46,8 @@ group :development, :test do
   gem 'rspec-its'
   gem 'factory_girl_rails'
   gem 'faker'
+  gem 'pry'
+  gem 'pry-rails'
 end
 
 group :development do
