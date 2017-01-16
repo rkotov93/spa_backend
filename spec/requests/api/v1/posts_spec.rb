@@ -7,11 +7,27 @@ RSpec.describe 'Posts', type: :request do
   let!(:first_post) { create :post, user: author }
 
   describe 'GET /posts' do
-    before { get api_v1_posts_path }
+    context 'without pagination' do
+      before { get api_v1_posts_path }
 
-    it 'returns list of posts' do
-      expect(response).to have_http_status(200)
-      expect(response.body).to eq [PostSerializer.new(first_post)].to_json
+      it 'returns list of posts' do
+        expect(response).to have_http_status(200)
+        expect(response.body).to eq [PostSerializer.new(first_post)].to_json
+      end
+    end
+
+    context 'with pagination' do
+      let!(:another_post) { create :post, user: author, created_at: DateTime.current - 1.day }
+
+      before do
+        Post.per_page = 1
+        get api_v1_posts_path(page: 2)
+      end
+
+      it 'returns list of posts on second page' do
+        expect(response).to have_http_status(200)
+        expect(response.body).to eq [PostSerializer.new(another_post)].to_json
+      end
     end
   end
 
