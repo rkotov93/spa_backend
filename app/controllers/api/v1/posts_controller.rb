@@ -6,7 +6,7 @@ module Api
 
       def index
         posts = Post.includes(:user).order(created_at: :desc).page(params[:page] || 1)
-        render json: posts
+        render json: posts, meta: pagination_dict(posts)
       end
 
       def show
