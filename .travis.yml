@@ -2,10 +2,7 @@ language: ruby
 rvm:
   - 2.3.1
 env:
-  - db_user=postgres
-  - db_password=
-  - aws_access_key_id=aws_access_key_id
-  - aws_secret_access_key=aws_secret_access_key
+  - db_user=postgres db_password= aws_access_key_id=aws_access_key_id aws_secret_access_key=aws_secret_access_key
 services:
   - postgresql
 addons:
