@@ -7,11 +7,33 @@ RSpec.describe 'Posts', type: :request do
   let!(:first_post) { create :post, user: author }
 
   describe 'GET /posts' do
-    before { get api_v1_posts_path }
+    context 'without pagination' do
+      before { get api_v1_posts_path }
 
-    it 'returns list of posts' do
-      expect(response).to have_http_status(200)
-      expect(response.body).to eq [PostSerializer.new(first_post)].to_json
+      it 'returns list of posts' do
+        expect(response).to have_http_status(200)
+        expect(response.body).to eq({
+          posts: [PostSerializer.new(first_post)],
+          meta: { current_page: 1, total_pages: 1, total_count: 1 }
+        }.to_json)
+      end
+    end
+
+    context 'with pagination' do
+      let!(:another_post) { create :post, user: author, created_at: DateTime.current - 1.day }
+
+      before do
+        Post.per_page = 1
+        get api_v1_posts_path(page: 2)
+      end
+
+      it 'returns list of posts on second page' do
+        expect(response).to have_http_status(200)
+        expect(response.body).to eq({
+          posts: [PostSerializer.new(another_post)],
+          meta: { current_page: 2, total_pages: 2, total_count: 2 }
+        }.to_json)
+      end
     end
   end
 
@@ -20,7 +42,7 @@ RSpec.describe 'Posts', type: :request do
 
     it 'returns requested post' do
       expect(response).to have_http_status(200)
-      expect(response.body).to eq PostSerializer.new(first_post).to_json
+      expect(response.body).to eq({ post: PostSerializer.new(first_post) }.to_json)
     end
   end
 
@@ -37,7 +59,7 @@ RSpec.describe 'Posts', type: :request do
       it 'creates and returns new post' do
         expect(Post.count).to eq posts_count + 1
         expect(response).to have_http_status(200)
-        expect(response.body).to eq PostSerializer.new(Post.last).to_json
+        expect(response.body).to eq({ post: PostSerializer.new(Post.last) }.to_json)
       end
     end
 
@@ -51,7 +73,7 @@ RSpec.describe 'Posts', type: :request do
         expect(response).to have_http_status(406)
         invalid_post = Post.new(post_params.merge(user: author))
         invalid_post.valid?
-        expect(response.body).to eq PostSerializer.new(invalid_post).to_json
+        expect(response.body).to eq({ post: PostSerializer.new(invalid_post) }.to_json)
       end
     end
   end

@@ -7,6 +7,14 @@ class ApplicationController < ActionController::API
 
   private
 
+  def pagination_dict(collection)
+    {
+      current_page: collection.current_page,
+      total_pages: collection.total_pages,
+      total_count: collection.count
+    }
+  end
+
   def user_not_authorized
     render status: :unauthorized
   end
