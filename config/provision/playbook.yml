@@ -78,14 +78,14 @@
       shell: 'createdb -U postgres -O postgres -E UTF8 -l en_US.UTF-8 {{ name }}_production'
       when: 'postgres_config_copied|failed'
 
-    - name: application | check configs
-      command: test -f {{ application }}/shared/config/application.yml
-      register: application_config_copied
-      ignore_errors: yes
+    # - name: application | check configs
+    #   command: test -f {{ application }}/shared/config/application.yml
+    #   register: application_config_copied
+    #   ignore_errors: yes
 
     - name: application | copy application.yml
       template: 'src=configs/application.yml dest={{ application }}/shared/config/application.yml owner={{ user }} group={{ user }} mode=0644'
-      when: application_config_copied|failed
+      # when: application_config_copied|failed
 
     - name: nginx | check configs
       command: test -f /etc/nginx/sites-enabled/{{ name }}.conf
